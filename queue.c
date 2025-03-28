@@ -46,6 +46,7 @@ static void dll_push(struct dll_l *lst, size_t val, size_t *cache)
 
   struct dll_node *first = malloc(sizeof(*first));
   first->value = val;
+  first->prev = NULL;
 
   first->next = lst->first;
   if (lst->first != NULL)
@@ -93,16 +94,14 @@ static size_t dll_pop(struct dll_l *lst)
   return ret_val;
 }
 
-static void dll_free(struct dll_l *lst)
+static void dll_free(struct dll_l lst)
 {
-  struct dll_node *tmp;
   while (lst->first != NULL)
   {
-    tmp = lst->first;
+    lst->last = lst->first;
     lst->first = lst->first->next;
-    free(tmp);
+    free(lst->last);
   }
-  free(lst);
 }
 
 int number_of_moves(struct game_state start)
@@ -114,15 +113,15 @@ int number_of_moves(struct game_state start)
   struct game_state cur;
 
   size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
-  struct dll_l *lst = calloc(1, sizeof(*lst));
+  struct dll_l lst = {0};
 
-  dll_push(lst, serialize(start), cache);
+  dll_push(&lst, serialize(start), cache);
 
   // actually this is just explosive so i guess the queue never empties
   errno = 0;
   while (1)
   {
-    cur_s = dll_pop(lst);
+    cur_s = dll_pop(&lst);
     if (errno != 0)
     {
       break;
@@ -138,28 +137,28 @@ int number_of_moves(struct game_state start)
     {
       start = cur;
       move_up(&start);
-      dll_push(lst, serialize(start), cache);
+      dll_push(&lst, serialize(start), cache);
     }
 
     if (cur.empty_col != 3)
     {
       start = cur;
       move_left(&start);
-      dll_push(lst, serialize(start), cache);
+      dll_push(&lst, serialize(start), cache);
     }
 
     if (cur.empty_row != 0)
     {
       start = cur;
       move_down(&start);
-      dll_push(lst, serialize(start), cache);
+      dll_push(&lst, serialize(start), cache);
     }
 
     if (cur.empty_col != 0)
     {
       start = cur;
       move_right(&start);
-      dll_push(lst, serialize(start), cache);
+      dll_push(&lst, serialize(start), cache);
     }
   }
 
