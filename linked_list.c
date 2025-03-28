@@ -88,9 +88,12 @@ size_t remove_from_tail(struct linked_list *list)
 
     ret_val = cur->value;
     // account for one element list
-    if (last != NULL) {
+    if (last != NULL)
+    {
       last->next = NULL;
-    } else {
+    }
+    else
+    {
       list->head = NULL;
     }
     free(cur);
