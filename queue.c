@@ -86,40 +86,32 @@ int number_of_moves(struct game_state start)
 
     // hack: use 1 << 14th and 1 << 13th bits to store prev direction
     // up = 10, down = 11, left = 00, right = 01
-    if (((cur_s >> 13) & 0b11) != 0b11) {
+    if (cur.empty_row != 3 && ((cur_s >> 13) & 0b11) != 0b11) {
       start = cur;
       start.num_steps = cur.num_steps | (0b10 << 13);
-      if (start.empty_row != 3) {
-        move_up(&start);
-        lln_push(head, serialize(start));
-      }
+      move_up(&start);
+      lln_push(head, serialize(start));
     }
 
-    if (((cur_s >> 13) & 0b11) != 0b10) {
+    if (cur.empty_row != 0 && ((cur_s >> 13) & 0b11) != 0b10) {
       start = cur;
       start.num_steps = cur.num_steps | (0b11 << 13);
-      if (start.empty_row != 0) {
-        move_down(&start);
-        lln_push(head, serialize(start));
-      }
+      move_down(&start);
+      lln_push(head, serialize(start));
     }
 
-    if (((cur_s >> 13) & 0b11) != 0b01) {
+    if (cur.empty_col != 3 && ((cur_s >> 13) & 0b11) != 0b01) {
       start = cur;
       start.num_steps = cur.num_steps | (0b00 << 13);
-      if (start.empty_col != 3) {
-        move_left(&start);
-        lln_push(head, serialize(start));
-      }
+      move_left(&start);
+      lln_push(head, serialize(start));
     }
 
-    if (((cur_s >> 13) & 0b11) != 0b00) {
+    if (cur.empty_col != 0 && ((cur_s >> 13) & 0b11) != 0b00) {
       start = cur;
       start.num_steps = cur.num_steps | (0b01 << 13);
-      if (start.empty_col != 0) {
-        move_right(&start);
-        lln_push(head, serialize(start));
-      }
+      move_right(&start);
+      lln_push(head, serialize(start));
     }
   }
 
