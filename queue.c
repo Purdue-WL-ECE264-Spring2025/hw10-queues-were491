@@ -81,8 +81,8 @@ int number_of_moves(struct game_state start)
   size_t cur_s;
   struct game_state cur;
 
-  struct list_node *head = calloc(1, sizeof(struct list_node));
   size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
+  struct list_node *head = calloc(1, sizeof(struct list_node));
 
   lln_push(head, serialize(start), cache);
 
