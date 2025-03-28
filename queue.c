@@ -70,12 +70,13 @@ int number_of_moves(struct game_state start)
 {
   // value of top 49 bits when game solved
   const size_t solved = 81985526993846272 >> 15;
-  size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
 
   size_t cur_s;
   struct game_state cur;
 
   struct list_node *head = calloc(1, sizeof(struct list_node));
+  size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
+
   lln_push(head, serialize(start), cache);
 
   // actually this is just explosive so i guess the queue never empties
