@@ -12,95 +12,33 @@
 void enqueue(struct queue *q, struct game_state state)
 {
   assert(q != NULL);
-  insert_at_head(&(q->data), serialize(state));
+  insert_at_tail(&(q->data), serialize(state));
 }
 
 struct game_state dequeue(struct queue *q)
 {
   assert(q != NULL);
-  return deserialize(remove_from_tail(&(q->data)));
+  return deserialize(remove_from_head(&(q->data)));
 }
 
-// Anything to prevent a time-out... well, while still being forced to use BFS
-// head is a dummy, first real element is head->next
-struct dll_node
+static inline void enqueue_hax(struct queue *q, struct queue *qlast,
+                               struct game_state start, size_t cache[])
 {
-  struct dll_node *next;
-  struct dll_node *prev;
-  size_t value;
-};
-
-struct dll_l
-{
-  struct dll_node *first;
-  struct dll_node *last;
-};
-
-static void dll_push(struct dll_l *lst, size_t val, size_t *cache)
-{
-  if (cache[(val >> 15) % CACHE_SIZE] == (val >> 15))
+  size_t start_s = serialize(start) >> 15;
+  if (cache[start_s % 100000] == start_s)
   {
     return;
   }
-  cache[(val >> 15) % CACHE_SIZE] = val >> 15;
+  cache[start_s % 100000] = start_s;
 
-  struct dll_node *first = malloc(sizeof(*first));
-  first->value = val;
-  first->prev = NULL;
-
-  first->next = lst->first;
-  if (lst->first != NULL)
+  enqueue(qlast, start);
+  if (q->data.head == NULL)
   {
-    lst->first->prev = first;
-  }
-
-  lst->first = first;
-  if (lst->last == NULL)
-  {
-    lst->last = first;
-  }
-}
-
-static size_t dll_pop(struct dll_l *lst)
-{
-  size_t ret_val;
-  struct dll_node *last;
-
-  if (lst->last == NULL)
-  {
-    errno = EINVAL;
-    return 0;
-  }
-
-  ret_val = lst->last->value;
-
-  if (lst->first == lst->last)
-  {
-    free(lst->last);
-    lst->first = NULL;
-    lst->last = NULL;
+    q->data = qlast->data;
   }
   else
   {
-    last = lst->last->prev;
-    free(lst->last);
-    lst->last = last;
-    if (last != NULL)
-    {
-      last->next = NULL;
-    }
-  }
-
-  return ret_val;
-}
-
-static void dll_free(struct dll_l lst)
-{
-  while (lst->first != NULL)
-  {
-    lst->last = lst->first;
-    lst->first = lst->first->next;
-    free(lst->last);
+    qlast->data.head = qlast->data.head->next;
   }
 }
 
@@ -109,26 +47,33 @@ int number_of_moves(struct game_state start)
   // value of top 49 bits when game solved
   const size_t solved = 81985526993846272 >> 15;
 
-  size_t cur_s;
   struct game_state cur;
 
-  size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
-  struct dll_l lst = {0};
+  struct queue qq = {0};
+  struct queue qqlast = {0}; // caches last node in list so insertion is O(1)
 
-  dll_push(&lst, serialize(start), cache);
+  // poorly written but very fast cache
+  // breaks on large step counts, but the max is only about 80 anyways
+  size_t cache[CACHE_SIZE] = {0};
+
+  enqueue_hax(&qq, &qqlast, start, cache);
 
   // actually this is just explosive so i guess the queue never empties
   errno = 0;
   while (1)
   {
-    cur_s = dll_pop(&lst);
+    cur = dequeue(&qq);
     if (errno != 0)
     {
       break;
     }
+    if (qq.data.head == NULL)
+    {
+      qqlast = qq;
+    }
 
-    cur = deserialize(cur_s);
-    if ((cur_s >> 15) == solved)
+    // this repeated serialization-deserialization code seriously ticks me off
+    if ((serialize(cur) >> 15) == solved)
     {
       break;
     }
@@ -137,33 +82,32 @@ int number_of_moves(struct game_state start)
     {
       start = cur;
       move_up(&start);
-      dll_push(&lst, serialize(start), cache);
+      enqueue_hax(&qq, &qqlast, start, cache);
     }
 
     if (cur.empty_col != 3)
     {
       start = cur;
       move_left(&start);
-      dll_push(&lst, serialize(start), cache);
+      enqueue_hax(&qq, &qqlast, start, cache);
     }
 
     if (cur.empty_row != 0)
     {
       start = cur;
       move_down(&start);
-      dll_push(&lst, serialize(start), cache);
+      enqueue_hax(&qq, &qqlast, start, cache);
     }
 
     if (cur.empty_col != 0)
     {
       start = cur;
       move_right(&start);
-      dll_push(&lst, serialize(start), cache);
+      enqueue_hax(&qq, &qqlast, start, cache);
     }
   }
 
-  free(cache);
-  dll_free(lst);
+  free_list(qq.data);
 
   if (errno == EINVAL)
   {

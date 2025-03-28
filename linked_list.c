@@ -40,6 +40,7 @@ void insert_at_tail(struct linked_list *list, size_t value)
 
   // add a new node
   struct list_node *new_tail = new_node(value);
+  new_tail->next = NULL;
   cur->next = new_tail;
 }
 
@@ -88,6 +89,8 @@ size_t remove_from_tail(struct linked_list *list)
 
     ret_val = cur->value;
     // account for one element list
+    // we can't just set last = cur at the beginning
+    // since we also need to set list->head
     if (last != NULL)
     {
       last->next = NULL;
