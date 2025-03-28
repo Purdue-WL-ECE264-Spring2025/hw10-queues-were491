@@ -1,4 +1,4 @@
-CFLAGS = -std=c99 -g -Ofast -Wall -Wshadow -Wvla -Werror -Wunreachable-code
+CFLAGS = -std=c99 -g -Wall -Wshadow -Wvla -Werror -Wunreachable-code
 OBJS = main.o linked_list.o tile_game.o queue.o
 HEADERS = linked_list.h tile_game.h
 APP = hw10
