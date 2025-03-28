@@ -23,13 +23,15 @@ struct game_state dequeue(struct queue *q)
 
 // Anything to prevent a time-out... well, while still being forced to use BFS
 // head is a dummy, first real element is head->next
-struct dll_node {
+struct dll_node
+{
   struct dll_node *next;
   struct dll_node *prev;
   size_t value;
 };
 
-struct dll_l {
+struct dll_l
+{
   struct dll_node *first;
   struct dll_node *last;
 };
@@ -46,12 +48,14 @@ static void dll_push(struct dll_l *lst, size_t val, size_t *cache)
   first->value = val;
 
   first->next = lst->first;
-  if (lst->first != NULL) {
+  if (lst->first != NULL)
+  {
     lst->first->prev = first;
   }
 
   lst->first = first;
-  if (lst->last == NULL) {
+  if (lst->last == NULL)
+  {
     lst->last = first;
   }
 }
@@ -61,22 +65,27 @@ static size_t dll_pop(struct dll_l *lst)
   size_t ret_val;
   struct dll_node *last;
 
-  if (lst->last == NULL) {
+  if (lst->last == NULL)
+  {
     errno = EINVAL;
     return 0;
   }
 
   ret_val = lst->last->value;
 
-  if (lst->first == lst->last) {
+  if (lst->first == lst->last)
+  {
     free(lst->last);
     lst->first = NULL;
     lst->last = NULL;
-  } else {
+  }
+  else
+  {
     last = lst->last->prev;
     free(lst->last);
     lst->last = last;
-    if (last != NULL) {
+    if (last != NULL)
+    {
       last->next = NULL;
     }
   }
@@ -132,17 +141,17 @@ int number_of_moves(struct game_state start)
       dll_push(lst, serialize(start), cache);
     }
 
-    if (cur.empty_row != 0)
-    {
-      start = cur;
-      move_down(&start);
-      dll_push(lst, serialize(start), cache);
-    }
-
     if (cur.empty_col != 3)
     {
       start = cur;
       move_left(&start);
+      dll_push(lst, serialize(start), cache);
+    }
+
+    if (cur.empty_row != 0)
+    {
+      start = cur;
+      move_down(&start);
       dll_push(lst, serialize(start), cache);
     }
 
