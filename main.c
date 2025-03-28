@@ -4,6 +4,21 @@
 #include <stdlib.h>
 
 int main(int argc, char **argv) {
+  // struct linked_list test;
+  // insert_at_head(&test, 1);
+  // insert_at_head(&test, 2);
+  // insert_at_head(&test, 3);
+  // insert_at_tail(&test, 4);
+  // insert_at_tail(&test, 5);
+  // insert_at_tail(&test, 6);
+  // printf("%ld\n", remove_from_head(&test));
+  // printf("%ld\n", remove_from_tail(&test));
+  // insert_at_head(&test, 62);
+  // printf("%ld\n", remove_from_head(&test));
+  // dump_list(stdout, test);
+  // free_list(test);
+  // return 0;
+
   if (argc < 2) {
     fprintf(stderr, "Usage: %s [test file]\n", argv[0]);
     exit(1);
