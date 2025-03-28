@@ -120,42 +120,35 @@ int number_of_moves(struct game_state start)
     }
 
     cur = deserialize(cur_s);
-    cur.num_steps &= (1 << 13) - 1;
     if ((cur_s >> 15) == solved)
     {
       break;
     }
 
-    // hack: use 1 << 14th and 1 << 13th bits to store prev direction
-    // up = 10, down = 11, left = 00, right = 01
-    if (cur.empty_row != 3 && ((cur_s >> 13) & 0b11) != 0b11)
+    if (cur.empty_row != 3)
     {
       start = cur;
-      start.num_steps = cur.num_steps | (0b10 << 13);
       move_up(&start);
       dll_push(lst, serialize(start), cache);
     }
 
-    if (cur.empty_row != 0 && ((cur_s >> 13) & 0b11) != 0b10)
+    if (cur.empty_row != 0)
     {
       start = cur;
-      start.num_steps = cur.num_steps | (0b11 << 13);
       move_down(&start);
       dll_push(lst, serialize(start), cache);
     }
 
-    if (cur.empty_col != 3 && ((cur_s >> 13) & 0b11) != 0b01)
+    if (cur.empty_col != 3)
     {
       start = cur;
-      start.num_steps = cur.num_steps | (0b00 << 13);
       move_left(&start);
       dll_push(lst, serialize(start), cache);
     }
 
-    if (cur.empty_col != 0 && ((cur_s >> 13) & 0b11) != 0b00)
+    if (cur.empty_col != 0)
     {
       start = cur;
-      start.num_steps = cur.num_steps | (0b01 << 13);
       move_right(&start);
       dll_push(lst, serialize(start), cache);
     }
