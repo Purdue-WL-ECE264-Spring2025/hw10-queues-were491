@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
+// for some reason powers of two are really slow at this
+// and trying to resist collisions doesn't help either
 #define CACHE_SIZE 100000
 
 void enqueue(struct queue *q, struct game_state state)
@@ -82,7 +84,7 @@ int number_of_moves(struct game_state start)
   struct game_state cur;
 
   size_t *cache = calloc(CACHE_SIZE, sizeof(*cache));
-  struct list_node *head = calloc(1, sizeof(struct list_node));
+  struct list_node *head = calloc(1, sizeof(*head));
 
   lln_push(head, serialize(start), cache);
 
